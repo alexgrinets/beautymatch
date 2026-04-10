@@ -2,65 +2,14 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 
 const STATIC_MASTERS = [
-  {
-    id: 1, name: "Аліна Соколова", specialty: "Бровіст & Візажист",
-    rating: 4.9, reviews_count: 312, distance: "0.8 км", price_from: 800,
-    tags: ["Брови", "Макіяж", "Ламінування"], availability: "Сьогодні вільна",
-    bio: "7 років досвіду. Спеціалізуюсь на натуральному макіяжі та архітектурі брів.",
-    avatar_url: "https://i.pravatar.cc/300?img=47",
-    portfolio_urls: ["https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1519415943484-9fa1873496d4?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=400&h=500&fit=crop"],
-    is_verified: true, address: "вул. Хрещатик, 14", is_promoted: true,
-  },
-  {
-    id: 2, name: "Оксана Лисенко", specialty: "Нейл-майстер",
-    rating: 4.8, reviews_count: 198, distance: "1.2 км", price_from: 550,
-    tags: ["Манікюр", "Педикюр", "Гель-лак"], availability: "Завтра з 10:00",
-    bio: "Nail-art майстриня. Люблю мінімалізм і складний дизайн.",
-    avatar_url: "https://i.pravatar.cc/300?img=45",
-    portfolio_urls: ["https://images.unsplash.com/photo-1604654894610-df63bc536fac?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1604654894533-1c5a9c4c5e49?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1604654894568-9ff3bdf3b5da?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1604655406337-96d2b8c0f1dc?w=400&h=500&fit=crop"],
-    is_verified: true, address: "вул. Саксаганського, 32", is_promoted: false,
-  },
-  {
-    id: 3, name: "Марина Дорошенко", specialty: "Перукар-стиліст",
-    rating: 4.95, reviews_count: 421, distance: "2.1 км", price_from: 1200,
-    tags: ["Стрижка", "Фарбування", "Кератин"], availability: "Сьогодні з 15:00",
-    bio: "Топ-майстер міста. 12 років у сфері.",
-    avatar_url: "https://i.pravatar.cc/300?img=44",
-    portfolio_urls: ["https://images.unsplash.com/photo-1560869713-da86a9ec0744?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&h=500&fit=crop"],
-    is_verified: true, address: "вул. Велика Васильківська, 77", is_promoted: false,
-  },
-  {
-    id: 4, name: "Катерина Іванова", specialty: "Лешмейкер",
-    rating: 4.7, reviews_count: 156, distance: "0.5 км", price_from: 700,
-    tags: ["Нарощування вій", "Ламінування вій", "Біозавивка"], availability: "Сьогодні вільна",
-    bio: "Ніжний погляд — моя справа. Навчалась у Кореї.",
-    avatar_url: "https://i.pravatar.cc/300?img=43",
-    portfolio_urls: ["https://images.unsplash.com/photo-1583001809873-a128495da465?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1574169208507-84376144848b?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=500&fit=crop"],
-    is_verified: false, address: "пр. Перемоги, 5", is_promoted: false,
-  },
-  {
-    id: 5, name: "Юлія Момот", specialty: "Косметолог",
-    rating: 4.9, reviews_count: 287, distance: "3.0 км", price_from: 1500,
-    tags: ["Чищення", "Пілінг", "Мезотерапія"], availability: "Завтра з 9:00",
-    bio: "Лікар-дерматолог з медичною освітою. Апаратна косметологія.",
-    avatar_url: "https://i.pravatar.cc/300?img=48",
-    portfolio_urls: ["https://images.unsplash.com/photo-1619451050621-83cb7aada2d7?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1532413992378-f169ac26fff0?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=400&h=500&fit=crop"],
-    is_verified: true, address: "вул. Золотоворітська, 2", is_promoted: true,
-  },
+  { id: 1, name: "Аліна Соколова", specialty: "Бровіст & Візажист", rating: 4.9, reviews_count: 312, distance: "0.8 км", price_from: 800, tags: ["Брови", "Макіяж", "Ламінування"], availability: "Сьогодні вільна", bio: "7 років досвіду. Спеціалізуюсь на натуральному макіяжі та архітектурі брів.", avatar_url: "https://i.pravatar.cc/300?img=47", portfolio_urls: ["https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1519415943484-9fa1873496d4?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=400&h=500&fit=crop"], is_verified: true, address: "вул. Хрещатик, 14", is_promoted: true },
+  { id: 2, name: "Оксана Лисенко", specialty: "Нейл-майстер", rating: 4.8, reviews_count: 198, distance: "1.2 км", price_from: 550, tags: ["Манікюр", "Педикюр", "Гель-лак"], availability: "Завтра з 10:00", bio: "Nail-art майстриня. Люблю мінімалізм і складний дизайн.", avatar_url: "https://i.pravatar.cc/300?img=45", portfolio_urls: ["https://images.unsplash.com/photo-1604654894610-df63bc536fac?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1604654894533-1c5a9c4c5e49?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1604654894568-9ff3bdf3b5da?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1604655406337-96d2b8c0f1dc?w=400&h=500&fit=crop"], is_verified: true, address: "вул. Саксаганського, 32", is_promoted: false },
+  { id: 3, name: "Марина Дорошенко", specialty: "Перукар-стиліст", rating: 4.95, reviews_count: 421, distance: "2.1 км", price_from: 1200, tags: ["Стрижка", "Фарбування", "Кератин"], availability: "Сьогодні з 15:00", bio: "Топ-майстер міста. 12 років у сфері.", avatar_url: "https://i.pravatar.cc/300?img=44", portfolio_urls: ["https://images.unsplash.com/photo-1560869713-da86a9ec0744?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&h=500&fit=crop"], is_verified: true, address: "вул. Велика Васильківська, 77", is_promoted: false },
+  { id: 4, name: "Катерина Іванова", specialty: "Лешмейкер", rating: 4.7, reviews_count: 156, distance: "0.5 км", price_from: 700, tags: ["Нарощування вій", "Ламінування вій", "Біозавивка"], availability: "Сьогодні вільна", bio: "Ніжний погляд — моя справа. Навчалась у Кореї.", avatar_url: "https://i.pravatar.cc/300?img=43", portfolio_urls: ["https://images.unsplash.com/photo-1583001809873-a128495da465?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1574169208507-84376144848b?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=500&fit=crop"], is_verified: false, address: "пр. Перемоги, 5", is_promoted: false },
+  { id: 5, name: "Юлія Момот", specialty: "Косметолог", rating: 4.9, reviews_count: 287, distance: "3.0 км", price_from: 1500, tags: ["Чищення", "Пілінг", "Мезотерапія"], availability: "Завтра з 9:00", bio: "Лікар-дерматолог з медичною освітою. Апаратна косметологія.", avatar_url: "https://i.pravatar.cc/300?img=48", portfolio_urls: ["https://images.unsplash.com/photo-1619451050621-83cb7aada2d7?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1532413992378-f169ac26fff0?w=400&h=500&fit=crop","https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=400&h=500&fit=crop"], is_verified: true, address: "вул. Золотоворітська, 2", is_promoted: true },
 ];
 
-const normalizeMaster = (m) => ({
-  ...m,
-  avatar: m.avatar_url,
-  portfolio: m.portfolio_urls || [],
-  verified: m.is_verified,
-  promoted: m.is_promoted,
-  rating: parseFloat(m.rating) || 5.0,
-  reviews: m.reviews_count || 0,
-  distance: m.distance || "—",
-  price: m.price_from ? `від ${m.price_from} ₴` : "—",
-});
-
+const normalizeMaster = (m) => ({ ...m, avatar: m.avatar_url, portfolio: m.portfolio_urls || [], verified: m.is_verified, promoted: m.is_promoted, rating: parseFloat(m.rating) || 5.0, reviews: m.reviews_count || 0, distance: m.distance || "—", price: m.price_from ? `від ${m.price_from} ₴` : "—" });
 const CATEGORIES = ["Всі", "Брови", "Нігті", "Волосся", "Вії", "Косметологія", "Макіяж"];
 
 export default function BeautyApp() {
@@ -84,56 +33,50 @@ export default function BeautyApp() {
   const msgEnd = useRef(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => { setUser(session?.user ?? null); setAuthLoading(false); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null));
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    const loadMasters = async () => {
+    const load = async () => {
       try {
         const { data, error } = await supabase.from("masters").select("*").order("is_promoted", { ascending: false }).order("rating", { ascending: false });
         if (error) throw error;
-        if (data && data.length > 0) {
-          setMasters(data.map(normalizeMaster));
-          setDbConnected(true);
-        } else {
-          setMasters(STATIC_MASTERS.map(normalizeMaster));
-        }
-      } catch {
-        setMasters(STATIC_MASTERS.map(normalizeMaster));
-      } finally {
-        setLoading(false);
-      }
+        if (data?.length > 0) { setMasters(data.map(normalizeMaster)); setDbConnected(true); }
+        else setMasters(STATIC_MASTERS.map(normalizeMaster));
+      } catch { setMasters(STATIC_MASTERS.map(normalizeMaster)); }
+      finally { setLoading(false); }
     };
-    loadMasters();
+    load();
   }, []);
 
+  // Завантажуємо лайки і матчі з бази після входу
   useEffect(() => {
-    if (masters.length > 0 && matches.length === 0) {
-      const first = masters[0];
-      setMatches([first]);
-      setChats({ [first.id]: { master: first, messages: [{ from: "master", text: `Привіт! Рада, що ми зматчились 💕`, time: "10:31" }] } });
-    }
-  }, [masters]);
+    if (!user || masters.length === 0) return;
+    const loadUserData = async () => {
+      try {
+        const { data: likesData } = await supabase.from("likes").select("to_master").eq("from_user", user.id);
+        if (likesData) setLikedIds(likesData.map(l => l.to_master));
+
+        const { data: matchesData } = await supabase.from("matches").select("master_id").eq("user_id", user.id);
+        if (matchesData?.length > 0) {
+          const ids = matchesData.map(m => m.master_id);
+          const matched = masters.filter(m => ids.includes(m.id));
+          setMatches(matched);
+          const newChats = {};
+          matched.forEach(m => { newChats[m.id] = { master: m, messages: [{ from: "master", text: `Привіт! Рада, що ми зматчились 💕`, time: "10:31" }] }; });
+          setChats(newChats);
+        }
+      } catch (e) { console.error(e); }
+    };
+    loadUserData();
+  }, [user, masters]);
 
   useEffect(() => { msgEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [chats, activeChat]);
 
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin },
-    });
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
+  const signInWithGoogle = async () => { await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } }); };
+  const signOut = async () => { await supabase.auth.signOut(); setLikedIds([]); setMatches([]); setChats({}); };
 
   const master = masters[cardIndex % (masters.length || 1)];
 
@@ -141,10 +84,17 @@ export default function BeautyApp() {
     if (!master) return;
     setSwipeAnim(dir);
     setTimeout(async () => {
-      setSwipeAnim(null);
-      setPhotoIndex(0);
+      setSwipeAnim(null); setPhotoIndex(0);
       if (dir === "right") {
         setLikedIds(p => [...p, master.id]);
+        if (user) {
+          try {
+            await supabase.from("likes").upsert({ from_user: user.id, to_master: master.id });
+            if (!matches.find(m => m.id === master.id)) {
+              await supabase.from("matches").upsert({ user_id: user.id, master_id: master.id });
+            }
+          } catch (e) { console.error(e); }
+        }
         if (!matches.find(m => m.id === master.id)) {
           setMatches(p => [...p, master]);
           setChats(p => ({ ...p, [master.id]: { master, messages: [{ from: "master", text: `Привіт! Я ${master.name} ✨ Рада нашому матчу!`, time: now() }] } }));
@@ -160,49 +110,37 @@ export default function BeautyApp() {
     const txt = chatInput; setChatInput("");
     setChats(p => ({ ...p, [activeChat]: { ...p[activeChat], messages: [...p[activeChat].messages, { from: "user", text: txt, time: now() }] } }));
     const replies = ["Звісно! 😊", "Гарний вибір! 💅", "Так, цей час вільний!", "Напишіть коли зручно ✨", "Дякую! Чекаю вас 💕"];
-    setTimeout(() => {
-      setChats(p => ({ ...p, [activeChat]: { ...p[activeChat], messages: [...p[activeChat].messages, { from: "master", text: replies[Math.floor(Math.random() * replies.length)], time: now() }] } }));
-    }, 1000);
+    setTimeout(() => { setChats(p => ({ ...p, [activeChat]: { ...p[activeChat], messages: [...p[activeChat].messages, { from: "master", text: replies[Math.floor(Math.random() * replies.length)], time: now() }] } })); }, 1000);
   };
 
-  if (authLoading || loading) {
-    return (
-      <div style={{ ...S.app, alignItems: "center", justifyContent: "center", gap: 16 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, color: "#f0e6dc", fontWeight: 300 }}>BeautyMatch</div>
-        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(212,160,123,0.2)", borderTop: "2px solid #d4a07b", animation: "spin 0.9s linear infinite" }} />
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      </div>
-    );
-  }
+  if (authLoading || loading) return (
+    <div style={{ ...S.app, alignItems: "center", justifyContent: "center", gap: 16 }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, color: "#f0e6dc", fontWeight: 300 }}>BeautyMatch</div>
+      <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(212,160,123,0.2)", borderTop: "2px solid #d4a07b", animation: "spin 0.9s linear infinite" }} />
+    </div>
+  );
 
-  if (!user) {
-    return (
-      <div style={{ ...S.app, alignItems: "center", justifyContent: "center", padding: "0 32px" }}>
-        <style>{CSS}</style>
-        <div style={{ textAlign: "center", width: "100%" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, color: "rgba(212,160,123,0.6)", letterSpacing: "3px", textTransform: "uppercase", marginBottom: 12 }}>Ласкаво просимо</div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 48, fontWeight: 300, color: "#f0e6dc", lineHeight: 1.1, marginBottom: 8 }}>Beauty<br/>Match</h1>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'DM Sans'", fontSize: 14, marginBottom: 48, lineHeight: 1.6 }}>Знаходь найкращих майстрів краси поряд з тобою</p>
-          <button onClick={signInWithGoogle} style={{ width: "100%", padding: "15px", background: "#fff", border: "none", borderRadius: 14, color: "#1a1410", fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Увійти через Google
-          </button>
-          <p style={{ color: "rgba(255,255,255,0.2)", fontFamily: "'DM Sans'", fontSize: 12, lineHeight: 1.6 }}>Натискаючи кнопку, ви погоджуєтесь з умовами використання</p>
-        </div>
+  if (!user) return (
+    <div style={{ ...S.app, alignItems: "center", justifyContent: "center", padding: "0 32px" }}>
+      <style>{CSS}</style>
+      <div style={{ textAlign: "center", width: "100%" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, color: "rgba(212,160,123,0.6)", letterSpacing: "3px", textTransform: "uppercase", marginBottom: 12 }}>Ласкаво просимо</div>
+        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 48, fontWeight: 300, color: "#f0e6dc", lineHeight: 1.1, marginBottom: 8 }}>Beauty<br/>Match</h1>
+        <p style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'DM Sans'", fontSize: 14, marginBottom: 48, lineHeight: 1.6 }}>Знаходь найкращих майстрів краси поряд з тобою</p>
+        <button onClick={signInWithGoogle} style={{ width: "100%", padding: "15px", background: "#fff", border: "none", borderRadius: 14, color: "#1a1410", fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Увійти через Google
+        </button>
+        <p style={{ color: "rgba(255,255,255,0.2)", fontFamily: "'DM Sans'", fontSize: 12 }}>Натискаючи кнопку, ви погоджуєтесь з умовами використання</p>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div style={S.app}>
       <style>{CSS}</style>
-
-      {dbConnected && (
-        <div style={{ position: "absolute", top: 8, right: 8, zIndex: 200, background: "rgba(78,203,113,0.1)", border: "1px solid rgba(78,203,113,0.3)", borderRadius: 10, padding: "2px 8px", display: "flex", alignItems: "center", gap: 4 }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ecb71" }} />
-          <span style={{ color: "#4ecb71", fontSize: 9, fontFamily: "'DM Sans'", fontWeight: 600 }}>LIVE</span>
-        </div>
-      )}
+      {dbConnected && <div style={{ position: "absolute", top: 8, right: 8, zIndex: 200, background: "rgba(78,203,113,0.1)", border: "1px solid rgba(78,203,113,0.3)", borderRadius: 10, padding: "2px 8px", display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ecb71" }} /><span style={{ color: "#4ecb71", fontSize: 9, fontFamily: "'DM Sans'", fontWeight: 600 }}>LIVE</span></div>}
 
       {matchOverlay && (
         <div style={S.overlay}>
@@ -241,20 +179,11 @@ export default function BeautyApp() {
                   </div>
                 </div>
                 <p style={S.modalBio}>{profileModal.bio}</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
-                  {(profileModal.tags || []).map(t => <span key={t} className="tag">{t}</span>)}
-                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>{(profileModal.tags || []).map(t => <span key={t} className="tag">{t}</span>)}</div>
                 <p style={S.portTitle}>Портфоліо</p>
-                <div style={S.portGrid}>
-                  {(profileModal.portfolio_urls || profileModal.portfolio || []).map((src, i) => <img key={i} src={src} style={S.portThumb} alt="" />)}
-                </div>
+                <div style={S.portGrid}>{(profileModal.portfolio_urls || profileModal.portfolio || []).map((src, i) => <img key={i} src={src} style={S.portThumb} alt="" />)}</div>
                 <p style={S.modalMeta}>📍 {profileModal.address}</p>
-                {profileModal.availability && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 10 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ecb71" }} />
-                    <span style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'DM Sans'", fontSize: 13 }}>{profileModal.availability}</span>
-                  </div>
-                )}
+                {profileModal.availability && <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 10 }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ecb71" }} /><span style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'DM Sans'", fontSize: 13 }}>{profileModal.availability}</span></div>}
               </div>
             </div>
           </div>
@@ -270,14 +199,11 @@ export default function BeautyApp() {
               <button style={S.iconBtn}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,160,123,0.8)" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
             </div>
           </div>
-          <div style={S.cats}>
-            {CATEGORIES.map(c => (
-              <button key={c} className="pill" style={{ background: activeCategory === c ? "linear-gradient(135deg,#d4a07b,#c4855a)" : "rgba(255,255,255,0.05)", color: activeCategory === c ? "#fff" : "rgba(255,255,255,0.45)", border: activeCategory === c ? "none" : "1px solid rgba(255,255,255,0.08)" }} onClick={() => setActiveCategory(c)}>{c}</button>
-            ))}
-          </div>
+          <div style={S.cats}>{CATEGORIES.map(c => <button key={c} className="pill" style={{ background: activeCategory === c ? "linear-gradient(135deg,#d4a07b,#c4855a)" : "rgba(255,255,255,0.05)", color: activeCategory === c ? "#fff" : "rgba(255,255,255,0.45)", border: activeCategory === c ? "none" : "1px solid rgba(255,255,255,0.08)" }} onClick={() => setActiveCategory(c)}>{c}</button>)}</div>
           <div style={S.cardWrap}>
             <div key={cardIndex} className={`card-in ${swipeAnim === "right" ? "go-right" : swipeAnim === "left" ? "go-left" : ""}`} style={S.card}>
               {(master.is_promoted || master.promoted) && <div style={S.promo}>⚡ Топ майстер</div>}
+              {likedIds.includes(master.id) && <div style={{ position: "absolute", top: 14, left: 14, background: "rgba(78,203,113,0.15)", border: "1px solid rgba(78,203,113,0.4)", borderRadius: 18, padding: "3px 10px", fontSize: 10, color: "#4ecb71", zIndex: 5, fontFamily: "'DM Sans'", fontWeight: 600 }}>✓ Вже лайкнуто</div>}
               <div className={`stamp-like ${swipeAnim === "right" ? "show-stamp" : ""}`}>ЛАЙК</div>
               <div className={`stamp-nope ${swipeAnim === "left" ? "show-stamp" : ""}`}>ПРОПУСК</div>
               <div style={{ position: "relative", height: 460 }}>
@@ -287,21 +213,11 @@ export default function BeautyApp() {
                 <div style={{ position: "absolute", top: 0, right: 0, width: "40%", height: "100%", zIndex: 4 }} onClick={() => setPhotoIndex((photoIndex + 1) % Math.max(1, (master.portfolio_urls || master.portfolio || []).length))} />
                 <div style={S.grad} />
                 <div style={S.info}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 2 }}>
-                    <span style={S.cName}>{master.name}</span>
-                    {(master.is_verified || master.verified) && <span style={S.badge}>✓</span>}
-                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 2 }}><span style={S.cName}>{master.name}</span>{(master.is_verified || master.verified) && <span style={S.badge}>✓</span>}</div>
                   <p style={S.cSpec}>{master.specialty}</p>
-                  <div style={{ display: "flex", gap: 7, marginBottom: 8 }}>
-                    {["⭐ " + master.rating, "📍 " + master.distance, "💳 " + (master.price || `від ${master.price_from} ₴`)].map(v => <span key={v} style={S.chip}>{v}</span>)}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ecb71" }} />
-                    <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, fontFamily: "'DM Sans'" }}>{master.availability}</span>
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                    {(master.tags || []).slice(0, 3).map(t => <span key={t} className="tag">{t}</span>)}
-                  </div>
+                  <div style={{ display: "flex", gap: 7, marginBottom: 8 }}>{["⭐ " + master.rating, "📍 " + master.distance, "💳 " + (master.price || `від ${master.price_from} ₴`)].map(v => <span key={v} style={S.chip}>{v}</span>)}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ecb71" }} /><span style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, fontFamily: "'DM Sans'" }}>{master.availability}</span></div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>{(master.tags || []).slice(0, 3).map(t => <span key={t} className="tag">{t}</span>)}</div>
                   <button style={S.moreBtn} onClick={() => setProfileModal(master)}>Портфоліо & деталі →</button>
                 </div>
               </div>
@@ -319,35 +235,37 @@ export default function BeautyApp() {
         <div style={S.screen}>
           <div style={S.header}><div><p style={S.headerSub}>{matches.length} матчів</p><h1 style={S.logo}>Мої матчі</h1></div></div>
           <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 90px" }}>
-            <p style={S.sec}>Нові ✨</p>
-            <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 10 }}>
-              {matches.slice(-5).map(m => (
-                <div key={m.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer" }} onClick={() => { setActiveChat(m.id); setScreen("chat"); }}>
-                  <div style={{ width: 66, height: 66, borderRadius: "50%", overflow: "hidden", border: "2.5px solid rgba(212,160,123,0.5)", flexShrink: 0 }}>
-                    <img src={m.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, fontFamily: "'DM Sans'" }}>{m.name.split(" ")[0]}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ ...S.sec, marginTop: 22 }}>Всі майстри</p>
-            {matches.map(m => (
-              <div key={m.id} style={S.listItem} onClick={() => setProfileModal(m)}>
-                <div style={{ position: "relative", flexShrink: 0 }}>
-                  <img src={m.avatar_url} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} alt="" />
-                  <div style={S.online} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={S.ln}>{m.name}</span>
-                    {(m.is_verified || m.verified) && <span style={S.badge}>✓</span>}
-                  </div>
-                  <p style={S.ls}>{m.specialty}</p>
-                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: "'DM Sans'", marginTop: 2 }}>⭐ {m.rating} · 📍 {m.distance} · {m.price}</p>
-                </div>
-                <button style={S.chatBubble} onClick={e => { e.stopPropagation(); setActiveChat(m.id); setScreen("chat"); }}>💬</button>
+            {matches.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", color: "rgba(255,255,255,0.3)", fontFamily: "'DM Sans'" }}>
+                <p style={{ fontSize: 40, marginBottom: 16 }}>💔</p>
+                <p style={{ fontSize: 16, marginBottom: 8 }}>Поки що немає матчів</p>
+                <p style={{ fontSize: 13 }}>Свайпай майстрів щоб отримати матч!</p>
               </div>
-            ))}
+            ) : (
+              <>
+                <p style={S.sec}>Нові ✨</p>
+                <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 10 }}>
+                  {matches.slice(-5).map(m => (
+                    <div key={m.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer" }} onClick={() => { setActiveChat(m.id); setScreen("chat"); }}>
+                      <div style={{ width: 66, height: 66, borderRadius: "50%", overflow: "hidden", border: "2.5px solid rgba(212,160,123,0.5)", flexShrink: 0 }}><img src={m.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /></div>
+                      <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, fontFamily: "'DM Sans'" }}>{m.name.split(" ")[0]}</p>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ ...S.sec, marginTop: 22 }}>Всі майстри</p>
+                {matches.map(m => (
+                  <div key={m.id} style={S.listItem} onClick={() => setProfileModal(m)}>
+                    <div style={{ position: "relative", flexShrink: 0 }}><img src={m.avatar_url} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} alt="" /><div style={S.online} /></div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={S.ln}>{m.name}</span>{(m.is_verified || m.verified) && <span style={S.badge}>✓</span>}</div>
+                      <p style={S.ls}>{m.specialty}</p>
+                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: "'DM Sans'", marginTop: 2 }}>⭐ {m.rating} · 📍 {m.distance} · {m.price}</p>
+                    </div>
+                    <button style={S.chatBubble} onClick={e => { e.stopPropagation(); setActiveChat(m.id); setScreen("chat"); }}>💬</button>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -358,19 +276,19 @@ export default function BeautyApp() {
             <>
               <div style={S.header}><div><p style={S.headerSub}>{Object.keys(chats).length} переписок</p><h1 style={S.logo}>Повідомлення</h1></div></div>
               <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 90px" }}>
-                {Object.values(chats).map(({ master: m, messages: msgs }) => {
+                {Object.keys(chats).length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "60px 20px", color: "rgba(255,255,255,0.3)", fontFamily: "'DM Sans'" }}>
+                    <p style={{ fontSize: 40, marginBottom: 16 }}>✉️</p>
+                    <p style={{ fontSize: 16, marginBottom: 8 }}>Немає повідомлень</p>
+                    <p style={{ fontSize: 13 }}>Зматчись з майстром щоб написати їй!</p>
+                  </div>
+                ) : Object.values(chats).map(({ master: m, messages: msgs }) => {
                   const last = msgs[msgs.length - 1];
                   return (
                     <div key={m.id} style={S.listItem} onClick={() => setActiveChat(m.id)}>
-                      <div style={{ position: "relative", flexShrink: 0 }}>
-                        <img src={m.avatar_url} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} alt="" />
-                        <div style={S.online} />
-                      </div>
+                      <div style={{ position: "relative", flexShrink: 0 }}><img src={m.avatar_url} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} alt="" /><div style={S.online} /></div>
                       <div style={{ flex: 1, overflow: "hidden" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={S.ln}>{m.name}</span>
-                          <span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, fontFamily: "'DM Sans'" }}>{last?.time}</span>
-                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}><span style={S.ln}>{m.name}</span><span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, fontFamily: "'DM Sans'" }}>{last?.time}</span></div>
                         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, fontFamily: "'DM Sans'", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{last?.text}</p>
                       </div>
                     </div>
@@ -383,10 +301,7 @@ export default function BeautyApp() {
               <div style={S.chatHead}>
                 <button style={{ background: "none", border: "none", color: "#d4a07b", fontSize: 24, cursor: "pointer" }} onClick={() => setActiveChat(null)}>‹</button>
                 <img src={chats[activeChat]?.master.avatar_url} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} alt="" />
-                <div style={{ flex: 1 }}>
-                  <p style={S.ln}>{chats[activeChat]?.master.name}</p>
-                  <p style={{ color: "#4ecb71", fontSize: 11, fontFamily: "'DM Sans'" }}>● Онлайн</p>
-                </div>
+                <div style={{ flex: 1 }}><p style={S.ln}>{chats[activeChat]?.master.name}</p><p style={{ color: "#4ecb71", fontSize: 11, fontFamily: "'DM Sans'" }}>● Онлайн</p></div>
                 <button style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer" }} onClick={() => setProfileModal(chats[activeChat]?.master)}>👤</button>
               </div>
               <div style={S.msgs}>
@@ -394,9 +309,7 @@ export default function BeautyApp() {
                   <div key={i} style={{ display: "flex", justifyContent: msg.from === "user" ? "flex-end" : "flex-start", marginBottom: 10, alignItems: "flex-end", gap: 8 }}>
                     {msg.from === "master" && <img src={chats[activeChat]?.master.avatar_url} style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} alt="" />}
                     <div style={{ maxWidth: "72%" }}>
-                      <div style={{ background: msg.from === "user" ? "linear-gradient(135deg,#d4a07b,#c4855a)" : "rgba(255,255,255,0.07)", borderRadius: msg.from === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px", padding: "10px 14px" }}>
-                        <p style={{ color: "#fff", fontSize: 14, fontFamily: "'DM Sans'", lineHeight: 1.4 }}>{msg.text}</p>
-                      </div>
+                      <div style={{ background: msg.from === "user" ? "linear-gradient(135deg,#d4a07b,#c4855a)" : "rgba(255,255,255,0.07)", borderRadius: msg.from === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px", padding: "10px 14px" }}><p style={{ color: "#fff", fontSize: 14, fontFamily: "'DM Sans'", lineHeight: 1.4 }}>{msg.text}</p></div>
                       <p style={{ color: "rgba(255,255,255,0.22)", fontSize: 10, fontFamily: "'DM Sans'", marginTop: 3, textAlign: msg.from === "user" ? "right" : "left" }}>{msg.time}</p>
                     </div>
                   </div>
@@ -434,19 +347,10 @@ export default function BeautyApp() {
               <button onClick={signOut} style={{ marginTop: 12, width: "100%", padding: "10px", background: "rgba(255,77,109,0.08)", border: "1px solid rgba(255,77,109,0.2)", borderRadius: 12, color: "#ff4d6d", fontFamily: "'DM Sans'", fontSize: 13, cursor: "pointer" }}>Вийти з акаунту</button>
             </div>
             <p style={{ ...S.sec, marginTop: 24 }}>Дорожня карта 🚀</p>
-            {[
-              { e: "🏪", t: "Салони краси", d: "Топові салони міста — скоро" },
-              { e: "📅", t: "Онлайн-запис", d: "Резервуйте час прямо в застосунку" },
-              { e: "⚡", t: "Просування майстрів", d: "Вихід у топ за підпискою" },
-              { e: "🎯", t: "Реклама брендів", d: "Нативна інтеграція косметичних брендів" },
-              { e: "📊", t: "Beauty Pulse", d: "Аналітика та інсайти для майстрів" },
-            ].map(({ e, t, d }) => (
+            {[{ e: "🏪", t: "Салони краси", d: "Топові салони міста — скоро" }, { e: "📅", t: "Онлайн-запис", d: "Резервуйте час прямо в застосунку" }, { e: "⚡", t: "Просування майстрів", d: "Вихід у топ за підпискою" }, { e: "🎯", t: "Реклама брендів", d: "Нативна інтеграція косметичних брендів" }, { e: "📊", t: "Beauty Pulse", d: "Аналітика та інсайти для майстрів" }].map(({ e, t, d }) => (
               <div key={t} style={S.roadItem}>
                 <span style={{ fontSize: 22 }}>{e}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ color: "#f0e6dc", fontFamily: "'DM Sans'", fontSize: 14, fontWeight: 500 }}>{t}</p>
-                  <p style={{ color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans'", fontSize: 12, marginTop: 2 }}>{d}</p>
-                </div>
+                <div style={{ flex: 1 }}><p style={{ color: "#f0e6dc", fontFamily: "'DM Sans'", fontSize: 14, fontWeight: 500 }}>{t}</p><p style={{ color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans'", fontSize: 12, marginTop: 2 }}>{d}</p></div>
                 <div style={{ background: "rgba(212,160,123,0.1)", border: "1px solid rgba(212,160,123,0.2)", borderRadius: 10, padding: "3px 10px", color: "#d4a07b", fontSize: 11, fontFamily: "'DM Sans'", fontWeight: 600 }}>Soon</div>
               </div>
             ))}
@@ -455,12 +359,7 @@ export default function BeautyApp() {
       )}
 
       <div style={S.nav}>
-        {[
-          { id: "discover", icon: "✦", label: "Пошук" },
-          { id: "matches", icon: "♥", label: "Матчі", n: matches.length },
-          { id: "chat", icon: "✉", label: "Чат", n: Object.keys(chats).length },
-          { id: "profile", icon: "◎", label: "Профіль" },
-        ].map(t => (
+        {[{ id: "discover", icon: "✦", label: "Пошук" }, { id: "matches", icon: "♥", label: "Матчі", n: matches.length }, { id: "chat", icon: "✉", label: "Чат", n: Object.keys(chats).length }, { id: "profile", icon: "◎", label: "Профіль" }].map(t => (
           <button key={t.id} className="nav-btn" style={{ color: screen === t.id ? "#d4a07b" : "rgba(255,255,255,0.3)", position: "relative" }} onClick={() => { setScreen(t.id); if (t.id !== "chat") setActiveChat(null); }}>
             <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
             <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.4px" }}>{t.label}</span>
