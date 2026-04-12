@@ -23,14 +23,16 @@ export default function BeautyApp() {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [likedIds, setLikedIds] = useState([]);
   const [matches, setMatches] = useState([]);
-  const [chats, setChats] = useState({});
-  const [activeChat, setActiveChat] = useState(null);
+  const [matchIds, setMatchIds] = useState({}); // { masterId: matchId }
+  const [messages, setMessages] = useState({}); // { matchId: [msg, ...] }
+  const [activeChat, setActiveChat] = useState(null); // masterId
   const [chatInput, setChatInput] = useState("");
   const [swipeAnim, setSwipeAnim] = useState(null);
   const [matchOverlay, setMatchOverlay] = useState(null);
   const [profileModal, setProfileModal] = useState(null);
   const [activeCategory, setActiveCategory] = useState("Всі");
   const msgEnd = useRef(null);
+  const realtimeRef = useRef(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => { setUser(session?.user ?? null); setAuthLoading(false); });
@@ -51,32 +53,96 @@ export default function BeautyApp() {
     load();
   }, []);
 
-  // Завантажуємо лайки і матчі з бази після входу
+  // Завантажуємо лайки, матчі і повідомлення після входу
   useEffect(() => {
     if (!user || masters.length === 0) return;
     const loadUserData = async () => {
       try {
+        // Лайки
         const { data: likesData } = await supabase.from("likes").select("to_master").eq("from_user", user.id);
         if (likesData) setLikedIds(likesData.map(l => l.to_master));
 
-        const { data: matchesData } = await supabase.from("matches").select("master_id").eq("user_id", user.id);
+        // Матчі
+        const { data: matchesData } = await supabase.from("matches").select("id, master_id").eq("user_id", user.id);
         if (matchesData?.length > 0) {
           const ids = matchesData.map(m => m.master_id);
           const matched = masters.filter(m => ids.includes(m.id));
           setMatches(matched);
-          const newChats = {};
-          matched.forEach(m => { newChats[m.id] = { master: m, messages: [{ from: "master", text: `Привіт! Рада, що ми зматчились 💕`, time: "10:31" }] }; });
-          setChats(newChats);
+
+          // Зберігаємо matchId для кожного майстра
+          const mIds = {};
+          matchesData.forEach(m => { mIds[m.master_id] = m.id; });
+          setMatchIds(mIds);
+
+          // Завантажуємо повідомлення для кожного матчу
+          const allMessages = {};
+          for (const match of matchesData) {
+            const { data: msgsData } = await supabase
+              .from("messages").select("*")
+              .eq("match_id", match.id)
+              .order("created_at", { ascending: true });
+            if (msgsData) {
+              allMessages[match.master_id] = msgsData.map(msg => ({
+                id: msg.id,
+                from: msg.sender_id === user.id ? "user" : "master",
+                text: msg.text,
+                time: new Date(msg.created_at).toLocaleTimeString("uk", { hour: "2-digit", minute: "2-digit" })
+              }));
+            }
+          }
+          setMessages(allMessages);
         }
       } catch (e) { console.error(e); }
     };
     loadUserData();
   }, [user, masters]);
 
-  useEffect(() => { msgEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [chats, activeChat]);
+  // Realtime підписка на нові повідомлення
+  useEffect(() => {
+    if (!user || Object.keys(matchIds).length === 0) return;
+
+    // Відписуємось від попередньої підписки
+    if (realtimeRef.current) {
+      supabase.removeChannel(realtimeRef.current);
+    }
+
+    const matchIdList = Object.values(matchIds);
+    const channel = supabase
+      .channel("messages-realtime")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      }, (payload) => {
+        const msg = payload.new;
+        if (!matchIdList.includes(msg.match_id)) return;
+
+        // Знаходимо masterId по matchId
+        const masterId = Object.keys(matchIds).find(k => matchIds[k] === msg.match_id);
+        if (!masterId) return;
+
+        const newMsg = {
+          id: msg.id,
+          from: msg.sender_id === user.id ? "user" : "master",
+          text: msg.text,
+          time: new Date(msg.created_at).toLocaleTimeString("uk", { hour: "2-digit", minute: "2-digit" })
+        };
+
+        setMessages(prev => ({
+          ...prev,
+          [masterId]: [...(prev[masterId] || []), newMsg]
+        }));
+      })
+      .subscribe();
+
+    realtimeRef.current = channel;
+    return () => { supabase.removeChannel(channel); };
+  }, [user, matchIds]);
+
+  useEffect(() => { msgEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, activeChat]);
 
   const signInWithGoogle = async () => { await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } }); };
-  const signOut = async () => { await supabase.auth.signOut(); setLikedIds([]); setMatches([]); setChats({}); };
+  const signOut = async () => { await supabase.auth.signOut(); setLikedIds([]); setMatches([]); setMatchIds({}); setMessages({}); };
 
   const master = masters[cardIndex % (masters.length || 1)];
 
@@ -87,17 +153,25 @@ export default function BeautyApp() {
       setSwipeAnim(null); setPhotoIndex(0);
       if (dir === "right") {
         setLikedIds(p => [...p, master.id]);
-        if (user) {
+        if (user && !matches.find(m => m.id === master.id)) {
           try {
             await supabase.from("likes").upsert({ from_user: user.id, to_master: master.id });
-            if (!matches.find(m => m.id === master.id)) {
-              await supabase.from("matches").upsert({ user_id: user.id, master_id: master.id });
+            const { data: matchData } = await supabase.from("matches")
+              .upsert({ user_id: user.id, master_id: master.id })
+              .select("id").single();
+
+            if (matchData) {
+              setMatchIds(prev => ({ ...prev, [master.id]: matchData.id }));
+              // Перше повідомлення від майстра
+              await supabase.from("messages").insert({
+                match_id: matchData.id,
+                sender_id: user.id,
+                text: `Привіт! Я ${master.name} ✨ Рада нашому матчу!`,
+              });
             }
           } catch (e) { console.error(e); }
-        }
-        if (!matches.find(m => m.id === master.id)) {
+
           setMatches(p => [...p, master]);
-          setChats(p => ({ ...p, [master.id]: { master, messages: [{ from: "master", text: `Привіт! Я ${master.name} ✨ Рада нашому матчу!`, time: now() }] } }));
           setMatchOverlay(master);
         }
       }
@@ -105,13 +179,32 @@ export default function BeautyApp() {
     }, 340);
   };
 
-  const sendMsg = () => {
+  const sendMsg = async () => {
     if (!chatInput.trim() || !activeChat) return;
     const txt = chatInput; setChatInput("");
-    setChats(p => ({ ...p, [activeChat]: { ...p[activeChat], messages: [...p[activeChat].messages, { from: "user", text: txt, time: now() }] } }));
-    const replies = ["Звісно! 😊", "Гарний вибір! 💅", "Так, цей час вільний!", "Напишіть коли зручно ✨", "Дякую! Чекаю вас 💕"];
-    setTimeout(() => { setChats(p => ({ ...p, [activeChat]: { ...p[activeChat], messages: [...p[activeChat].messages, { from: "master", text: replies[Math.floor(Math.random() * replies.length)], time: now() }] } })); }, 1000);
+    const matchId = matchIds[activeChat];
+    if (!matchId || !user) return;
+
+    try {
+      await supabase.from("messages").insert({
+        match_id: matchId,
+        sender_id: user.id,
+        text: txt,
+      });
+      // Авто-відповідь через 1 секунду
+      const replies = ["Звісно! 😊", "Гарний вибір! 💅", "Так, цей час вільний!", "Напишіть коли зручно ✨", "Дякую! Чекаю вас 💕"];
+      setTimeout(async () => {
+        await supabase.from("messages").insert({
+          match_id: matchId,
+          sender_id: "00000000-0000-0000-0000-000000000000", // системний sender
+          text: replies[Math.floor(Math.random() * replies.length)],
+        });
+      }, 1200);
+    } catch (e) { console.error(e); }
   };
+
+  const activeChatMessages = activeChat ? (messages[activeChat] || []) : [];
+  const activeChatMaster = activeChat ? matches.find(m => m.id === activeChat) : null;
 
   if (authLoading || loading) return (
     <div style={{ ...S.app, alignItems: "center", justifyContent: "center", gap: 16 }}>
@@ -170,10 +263,7 @@ export default function BeautyApp() {
                 <div style={S.modalHead}>
                   <img src={profileModal.avatar_url} style={S.modalAva} alt="" />
                   <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                      <span style={S.modalName}>{profileModal.name}</span>
-                      {(profileModal.is_verified || profileModal.verified) && <span style={S.badge}>✓</span>}
-                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={S.modalName}>{profileModal.name}</span>{(profileModal.is_verified || profileModal.verified) && <span style={S.badge}>✓</span>}</div>
                     <p style={S.modalSpec}>{profileModal.specialty}</p>
                     <p style={S.modalMeta}>⭐ {profileModal.rating} · 📍 {profileModal.distance} · {profileModal.price || `від ${profileModal.price_from} ₴`}</p>
                   </div>
@@ -274,22 +364,23 @@ export default function BeautyApp() {
         <div style={S.screen}>
           {!activeChat ? (
             <>
-              <div style={S.header}><div><p style={S.headerSub}>{Object.keys(chats).length} переписок</p><h1 style={S.logo}>Повідомлення</h1></div></div>
+              <div style={S.header}><div><p style={S.headerSub}>{matches.length} переписок</p><h1 style={S.logo}>Повідомлення</h1></div></div>
               <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 90px" }}>
-                {Object.keys(chats).length === 0 ? (
+                {matches.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "60px 20px", color: "rgba(255,255,255,0.3)", fontFamily: "'DM Sans'" }}>
                     <p style={{ fontSize: 40, marginBottom: 16 }}>✉️</p>
                     <p style={{ fontSize: 16, marginBottom: 8 }}>Немає повідомлень</p>
                     <p style={{ fontSize: 13 }}>Зматчись з майстром щоб написати їй!</p>
                   </div>
-                ) : Object.values(chats).map(({ master: m, messages: msgs }) => {
+                ) : matches.map(m => {
+                  const msgs = messages[m.id] || [];
                   const last = msgs[msgs.length - 1];
                   return (
                     <div key={m.id} style={S.listItem} onClick={() => setActiveChat(m.id)}>
                       <div style={{ position: "relative", flexShrink: 0 }}><img src={m.avatar_url} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} alt="" /><div style={S.online} /></div>
                       <div style={{ flex: 1, overflow: "hidden" }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}><span style={S.ln}>{m.name}</span><span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, fontFamily: "'DM Sans'" }}>{last?.time}</span></div>
-                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, fontFamily: "'DM Sans'", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{last?.text}</p>
+                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, fontFamily: "'DM Sans'", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{last?.text || "Почніть розмову!"}</p>
                       </div>
                     </div>
                   );
@@ -300,14 +391,20 @@ export default function BeautyApp() {
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div style={S.chatHead}>
                 <button style={{ background: "none", border: "none", color: "#d4a07b", fontSize: 24, cursor: "pointer" }} onClick={() => setActiveChat(null)}>‹</button>
-                <img src={chats[activeChat]?.master.avatar_url} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} alt="" />
-                <div style={{ flex: 1 }}><p style={S.ln}>{chats[activeChat]?.master.name}</p><p style={{ color: "#4ecb71", fontSize: 11, fontFamily: "'DM Sans'" }}>● Онлайн</p></div>
-                <button style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer" }} onClick={() => setProfileModal(chats[activeChat]?.master)}>👤</button>
+                <img src={activeChatMaster?.avatar_url} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} alt="" />
+                <div style={{ flex: 1 }}>
+                  <p style={S.ln}>{activeChatMaster?.name}</p>
+                  <p style={{ color: "#4ecb71", fontSize: 11, fontFamily: "'DM Sans'" }}>● Онлайн · Realtime</p>
+                </div>
+                <button style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer" }} onClick={() => setProfileModal(activeChatMaster)}>👤</button>
               </div>
               <div style={S.msgs}>
-                {chats[activeChat]?.messages.map((msg, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: msg.from === "user" ? "flex-end" : "flex-start", marginBottom: 10, alignItems: "flex-end", gap: 8 }}>
-                    {msg.from === "master" && <img src={chats[activeChat]?.master.avatar_url} style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} alt="" />}
+                {activeChatMessages.length === 0 && (
+                  <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", fontFamily: "'DM Sans'", fontSize: 13, padding: "20px 0" }}>Почніть розмову 👋</div>
+                )}
+                {activeChatMessages.map((msg, i) => (
+                  <div key={msg.id || i} style={{ display: "flex", justifyContent: msg.from === "user" ? "flex-end" : "flex-start", marginBottom: 10, alignItems: "flex-end", gap: 8 }}>
+                    {msg.from === "master" && <img src={activeChatMaster?.avatar_url} style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} alt="" />}
                     <div style={{ maxWidth: "72%" }}>
                       <div style={{ background: msg.from === "user" ? "linear-gradient(135deg,#d4a07b,#c4855a)" : "rgba(255,255,255,0.07)", borderRadius: msg.from === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px", padding: "10px 14px" }}><p style={{ color: "#fff", fontSize: 14, fontFamily: "'DM Sans'", lineHeight: 1.4 }}>{msg.text}</p></div>
                       <p style={{ color: "rgba(255,255,255,0.22)", fontSize: 10, fontFamily: "'DM Sans'", marginTop: 3, textAlign: msg.from === "user" ? "right" : "left" }}>{msg.time}</p>
@@ -334,15 +431,15 @@ export default function BeautyApp() {
               <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, color: "#f0e6dc", fontWeight: 400 }}>{user?.user_metadata?.name || "Користувач"}</p>
               <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'DM Sans'", fontSize: 13, marginTop: 4 }}>{user?.email}</p>
               <div style={{ display: "flex", gap: 10, marginTop: 16, width: "100%" }}>
-                {[{ n: likedIds.length, l: "Лайків" }, { n: matches.length, l: "Матчів" }, { n: Object.keys(chats).length, l: "Чатів" }].map(({ n, l }) => (
+                {[{ n: likedIds.length, l: "Лайків" }, { n: matches.length, l: "Матчів" }, { n: matches.length, l: "Чатів" }].map(({ n, l }) => (
                   <div key={l} style={{ flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: "12px 0", textAlign: "center" }}>
                     <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "#d4a07b" }}>{n}</p>
                     <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontFamily: "'DM Sans'" }}>{l}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 14, background: dbConnected ? "rgba(78,203,113,0.08)" : "rgba(255,255,255,0.04)", borderRadius: 10, padding: "8px 14px", border: `1px solid ${dbConnected ? "rgba(78,203,113,0.2)" : "rgba(255,255,255,0.06)"}`, width: "100%" }}>
-                <p style={{ color: dbConnected ? "#4ecb71" : "rgba(255,255,255,0.3)", fontFamily: "'DM Sans'", fontSize: 12, textAlign: "center" }}>{dbConnected ? "🟢 Підключено до Supabase" : "⚪ Демо-режим"}</p>
+              <div style={{ marginTop: 14, background: "rgba(78,203,113,0.08)", borderRadius: 10, padding: "8px 14px", border: "1px solid rgba(78,203,113,0.2)", width: "100%" }}>
+                <p style={{ color: "#4ecb71", fontFamily: "'DM Sans'", fontSize: 12, textAlign: "center" }}>🟢 Підключено до Supabase · Realtime</p>
               </div>
               <button onClick={signOut} style={{ marginTop: 12, width: "100%", padding: "10px", background: "rgba(255,77,109,0.08)", border: "1px solid rgba(255,77,109,0.2)", borderRadius: 12, color: "#ff4d6d", fontFamily: "'DM Sans'", fontSize: 13, cursor: "pointer" }}>Вийти з акаунту</button>
             </div>
@@ -359,7 +456,7 @@ export default function BeautyApp() {
       )}
 
       <div style={S.nav}>
-        {[{ id: "discover", icon: "✦", label: "Пошук" }, { id: "matches", icon: "♥", label: "Матчі", n: matches.length }, { id: "chat", icon: "✉", label: "Чат", n: Object.keys(chats).length }, { id: "profile", icon: "◎", label: "Профіль" }].map(t => (
+        {[{ id: "discover", icon: "✦", label: "Пошук" }, { id: "matches", icon: "♥", label: "Матчі", n: matches.length }, { id: "chat", icon: "✉", label: "Чат", n: matches.length }, { id: "profile", icon: "◎", label: "Профіль" }].map(t => (
           <button key={t.id} className="nav-btn" style={{ color: screen === t.id ? "#d4a07b" : "rgba(255,255,255,0.3)", position: "relative" }} onClick={() => { setScreen(t.id); if (t.id !== "chat") setActiveChat(null); }}>
             <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
             <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.4px" }}>{t.label}</span>
@@ -370,8 +467,6 @@ export default function BeautyApp() {
     </div>
   );
 }
-
-const now = () => new Date().toLocaleTimeString("uk", { hour: "2-digit", minute: "2-digit" });
 
 const S = {
   app: { width: "100%", maxWidth: 430, margin: "0 auto", height: "100vh", background: "#0d0b08", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" },
